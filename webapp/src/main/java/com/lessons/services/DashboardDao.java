@@ -40,4 +40,25 @@ public class DashboardDao
 
         return sDateTime;
     }
+
+    public int getNextVal(){
+        logger.debug("Called getNextVal");
+
+        String sql = ("Select nextval('seq_table_ids')");
+        JdbcTemplate jt = new JdbcTemplate(this.dataSource);
+        int nextVal = jt.queryForObject(sql, Integer.class);
+        logger.debug("Next value is {}", nextVal);
+
+        return nextVal;
+    }
+
+    public void addNewRecord(String desc){
+        logger.debug("Called addNewRecord");
+
+        String sql = "Insert into reports(id, description) values(nextval('seq_table_ids'), ?)";
+        JdbcTemplate jt = new JdbcTemplate(this.dataSource);
+        jt.update(sql, desc);
+
+        logger.debug("addNewRecord() completed");
+    }
 }

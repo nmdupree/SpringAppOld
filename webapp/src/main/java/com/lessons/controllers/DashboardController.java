@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -35,7 +36,7 @@ public class DashboardController {
      * getDateTime()
      * @return JSON string that holds the date/time
      *************************************************************************/
-    @RequestMapping(value = "/api/dashboard/time", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/app1/api/dashboard/time", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<?> getDateTime() {
         logger.debug("getDashboardDetails() started.");
 
@@ -48,4 +49,30 @@ public class DashboardController {
                 .contentType(MediaType.TEXT_PLAIN)
                 .body(sDateTime);
     }
+
+    @RequestMapping(value = "/api/nextval", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<?> getNextNumberInSeq(){
+        logger.debug("getNextNumberInSeq() started");
+
+        int nextVal = dashboardDao.getNextVal();
+        String result = "" + nextVal;
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(result);
+    }
+
+    @RequestMapping(value = "/api/dashboard/add", method = RequestMethod.POST, produces = "application/json")
+    public ResponseEntity<?> addNewRecord(@RequestParam(name="description") String description){
+        logger.debug("addNewRecord() started");
+
+        dashboardDao.addNewRecord(description);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body("");
+    }
+
 }
