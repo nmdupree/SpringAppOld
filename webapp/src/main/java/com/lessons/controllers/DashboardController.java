@@ -132,4 +132,21 @@ public class DashboardController {
                 .body(reportDTO);
 
     }
+
+    @RequestMapping(value = "/api/reports/review", method = RequestMethod.POST, produces = "application/json")
+    public ResponseEntity<?> review(@RequestParam(name="id") Integer reportId, @RequestParam(name="reviewed") Boolean reportReviewed){
+        logger.debug("review() called");
+
+        if (!dashboardDao.recordExists(reportId)) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body("Record not found, dummy.");
+        }
+
+        dashboardDao.updateReviewed(reportId, reportReviewed);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("");
+    }
 }
