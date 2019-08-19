@@ -2,6 +2,7 @@ package com.lessons.controllers;
 
 
 import com.lessons.models.ReportDTO;
+import com.lessons.models.ShortReportDTO;
 import com.lessons.services.DashboardDao;
 import com.lessons.services.ReportsService;
 import org.slf4j.Logger;
@@ -148,5 +149,17 @@ public class DashboardController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("");
+    }
+
+    @RequestMapping( value = "/api/reports/short", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<?> shortReport(){
+        logger.debug("shortReport() called");
+
+        List<ShortReportDTO> dtoList = reportsService.getShortReport2();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(dtoList);
+
     }
 }

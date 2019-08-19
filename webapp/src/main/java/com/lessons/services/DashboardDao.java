@@ -4,8 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -66,19 +70,51 @@ public class DashboardDao
         logger.debug("addNewRecord() completed");
     }
 
-    public void updateReviewed(Integer id, Boolean reviewed){
+    public void updateReviewed(final Integer id, final Boolean reviewed){
         logger.debug("updateReviewd() started");
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", id);
-        params.put("reviewed", reviewed);
+            TransactionTemplate tt = new TransactionTemplate();
+            tt.setTransactionManager(new DataSourceTransactionManager(dataSource));
 
-        String sql = "update reports set reviewed = :reviewed where id = :id";
-        NamedParameterJdbcTemplate np = new NamedParameterJdbcTemplate(dataSource);
+            // This transaction will throw a TransactionTimedOutException after 60 seconds (causing the transaction to rollback)
+            tt.setTimeout(60);
 
-        int count = np.update(sql, params);
-        logger.debug("Updated {} record(s)", count);
-    }
+            tt.execute(new TransactionCallbackWithoutResult()
+            {
+                protected void doInTransactionWithoutResult(TransactionStatus aStatus)
+                {
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("id", id);
+                    params.put("reviewed", reviewed);
+
+                    String sql = "update reports set reviewed = :reviewed where id = :id returning *";
+                    NamedParameterJdbcTemplate np = new NamedParameterJdbcTemplate(dataSource);
+
+                    Map<String, Object> updatedRecord = np.queryForMap(sql, params);
+
+                    int transactionId = getNextVal();
+
+                    sql = "INSERT into reports_aud (rev, rev_type, id, version, description, display_name, reviewed) " +
+                            "values (:rev, :rev_type, :id, :version, :description, :display_name, :reviewed)";
+
+                    params.clear();
+                    params.put("rev", transactionId);
+                    params.put("rev_type", 1);
+                    params.put("id", updatedRecord.get("id"));
+                    params.put("version", updatedRecord.get("version"));
+                    params.put("description", updatedRecord.get("description"));
+                    params.put("display_name", updatedRecord.get("display_name"));
+                    params.put("reviewed", updatedRecord.get("reviewed"));
+
+                    np.update(sql, params);
+
+                    logger.debug("Updated {} record(s)", updatedRecord);
+                }
+            });
+
+            logger.debug("Transaction finished");
+        }
+
 
     public boolean recordExists(Integer recordId){
 

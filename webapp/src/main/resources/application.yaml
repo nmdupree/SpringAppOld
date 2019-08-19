@@ -12,5 +12,17 @@ app.datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/springapp_db
     username: springapp_user
-    password: secret
+    password: ENC(CM64Uxs+V8Ri4nrKnMGfyw==)
     maxPoolSize: 10
+
+development.mode: true
+
+network: NIPR
+
+###########################################################
+# Password Encryption
+##########################################################
+jasypt:
+    encryptor:
+        algorithm: PBEWithMD5AndDES
+        password: 'ab5823423464j1k2#!!6298-+'
