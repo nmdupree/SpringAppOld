@@ -1,0 +1,10 @@
+app.datasource:
+  driver-class-name: org.postgresql.Driver
+  url: jdbc:postgresql://localhost:5432/springapp_db
+  username: springapp_user
+  password: secret
+  maxPoolSize: 10
+
+development.mode: true
+
+network: NIPR

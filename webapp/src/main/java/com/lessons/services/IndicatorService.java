@@ -29,12 +29,11 @@ public class IndicatorService {
         logger.debug("IndicatorService post constructor called.");
     }
 
-    public IndicatorCountDTO getIndicatorCount(){
+    public Integer getIndicatorCount(){
         String sql = "SELECT COUNT(*) FROM indicators";
         JdbcTemplate jt = new JdbcTemplate(this.dataSource);
-        IndicatorCountDTO ic = new IndicatorCountDTO(jt.queryForObject(sql, Integer.class));
 
-        return ic;
+        return jt.queryForObject(sql, Integer.class);
     }
 
     public IndicatorCountDTO getIndicatorCountRS(){
