@@ -1,0 +1,14 @@
+Paging
+
+Client Side Paging
+    - Returns ALL records to the front-end
+
+    ✓: Works for < 1k records
+    ✓: Simple
+    X: Does not scale; slow af with multiple records
+
+Server Side Paging
+    - Loads 1 page at a time
+
+    ✓: Scalable
+    X:

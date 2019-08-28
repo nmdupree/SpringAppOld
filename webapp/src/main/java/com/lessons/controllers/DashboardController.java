@@ -1,6 +1,7 @@
 package com.lessons.controllers;
 
 
+import com.lessons.filter.FilterService;
 import com.lessons.models.ReportDTO;
 import com.lessons.models.ShortReportDTO;
 import com.lessons.services.DashboardDao;
@@ -27,6 +28,9 @@ public class DashboardController {
 
     @Resource
     private ReportsService reportsService;
+
+    @Resource
+    private FilterService filterService;
 
     public DashboardController(){
         logger.debug("Constructor called");
@@ -160,6 +164,23 @@ public class DashboardController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(dtoList);
+
+    }
+
+    @RequestMapping( value = "/api/reports/filtered", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<?> filteredReport(@RequestParam(name="filters") List<String> filters){
+        logger.debug("filteredReport() called");
+
+        if (!filterService.areFiltersValid(filters)){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Your filters suck, dude.");
+        }
+        else {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body("");
+        }
 
     }
 }
