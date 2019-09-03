@@ -168,7 +168,7 @@ public class DashboardController {
     }
 
     @RequestMapping( value = "/api/reports/filtered", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<?> filteredReport(@RequestParam(name="filters") List<String> filters){
+    public ResponseEntity<?> filteredReport(@RequestParam(name="filters", required = false) List<String> filters){
         logger.debug("filteredReport() called");
 
         if (!filterService.areFiltersValid(filters)){
@@ -176,11 +176,11 @@ public class DashboardController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body("Your filters suck, dude.");
         }
-        else {
+
+        List<ShortReportDTO> dtoList = reportsService.getFilteredReports(filters);
+
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body("");
+                    .body(dtoList);
         }
-
-    }
 }

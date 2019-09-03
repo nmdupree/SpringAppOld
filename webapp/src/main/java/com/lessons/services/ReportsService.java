@@ -1,11 +1,14 @@
 package com.lessons.services;
 
+import com.lessons.filter.FilterParams;
+import com.lessons.filter.FilterService;
 import com.lessons.models.ShortReportDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +26,9 @@ public class ReportsService {
 
     @Resource
     private DataSource dataSource;
+
+    @Resource
+    private FilterService filterService;
 
     @Value("${development.mode:false}")
     private Boolean developmentMode;
@@ -92,6 +98,28 @@ public class ReportsService {
         String sql = "SELECT id, description, display_name FROM reports";
         JdbcTemplate jt = new JdbcTemplate(this.dataSource);
         List<ShortReportDTO> dtoList = jt.query(sql, rowMapper);
+
+        return dtoList;
+    }
+
+
+    public List<ShortReportDTO> getFilteredReports(List<String> filters) {
+
+        FilterParams fp = filterService.getFilterParamsForFilters(filters);
+        String whereClause = fp.getSqlWhereClause();
+        // Don't change this SQL - rowMapper will not fail, it will return nulls/bad data
+        String sql = "SELECT id, description, display_name FROM reports";
+        List<ShortReportDTO> dtoList;
+        BeanPropertyRowMapper rowMapper = new BeanPropertyRowMapper(ShortReportDTO.class);
+
+        if (!whereClause.isEmpty()){
+            NamedParameterJdbcTemplate np = new NamedParameterJdbcTemplate(this.dataSource);
+            sql = sql + " WHERE " + whereClause;
+            dtoList = np.query(sql, fp.getSqlParams(), rowMapper);
+        } else{
+            JdbcTemplate jt = new JdbcTemplate(this.dataSource);
+            dtoList = jt.query(sql, rowMapper);
+        }
 
         return dtoList;
     }

@@ -29,18 +29,19 @@ public enum FilterOperation {
      *
      */
 
-    EQUALS("EQUALS", "==", 3),
-    GREATER("GREATER", "==", 3),
-    GREATER_EQUAL("GREATER_EQUAL", "==", 3),
-    LESS("LESS","==", 3),
-    LESS_EQUAL("LESS_EQUAL", "==", 3),
-    BETWEEN("BETWEEN", "==", 4),
-    IN("IN", ">=", 3),
-    NOTIN("NOTIN", ">=", 3),
-    CONTAINS("CONTAINS", "==", 3),
-    ICONTAINS("ICONTAINS", "==", 3),
-    ISNULL("ISNULL", "==", 2),
-    ISNOTNULL("ISNOTNULL", "==", 2);
+    EQUALS("EQUALS", "==", 3, "%s = :%s::Integer"),
+    STRING_EQUALS("STRING_EQUALS", "==", 3, "%s = :%s"),
+    GREATER("GREATER", "==", 3, "%s > :%s::Integer"),
+    GREATER_EQUAL("GREATER_EQUAL", "==", 3,  "%s >= :%s::Integer"),
+    LESS("LESS","==", 3, "%s < :%s::Integer"),
+    LESS_EQUAL("LESS_EQUAL", "==", 3, "%s <= :%s::Integer"),
+    BETWEEN("BETWEEN", "==", 4, "%s BETWEEN :%s AND :%s"),
+    IN("IN", ">=", 3, "%s IN :%s"),
+    NOTIN("NOTIN", ">=", 3, "%s NOT IN :%s"),
+    CONTAINS("CONTAINS", "==", 3, "%s LIKE :%s"),
+    ICONTAINS("ICONTAINS", "==", 3, "%s ILIKE :%s"),
+    ISNULL("ISNULL", "==", 2, "%s IS NULL"),
+    ISNOTNULL("ISNOTNULL", "==", 2, "%s IS NOT NULL");
 
 
     private Logger logger = LoggerFactory.getLogger(FilterOperation.class);
@@ -48,12 +49,14 @@ public enum FilterOperation {
     private int tokenCount;
     private String compareOperation;
     private String filterOperation;
+    private String sqlOperator;
 
-    private FilterOperation(String filterOperation, String compareOperation, int tokenCount){
+    private FilterOperation(String filterOperation, String compareOperation, int tokenCount, String sqlOperator){
         logger.debug("FilterOperation() called");
         this.tokenCount=tokenCount;
         this.compareOperation = compareOperation;
         this.filterOperation = filterOperation;
+        this.sqlOperator = sqlOperator;
     }
 
     public int getTokenCount() {
@@ -66,6 +69,10 @@ public enum FilterOperation {
 
     public String getFilterOperation() {
         return filterOperation;
+    }
+
+    public String getSqlOperator() {
+        return sqlOperator;
     }
 
     public static FilterOperation getOperation(String operationName){

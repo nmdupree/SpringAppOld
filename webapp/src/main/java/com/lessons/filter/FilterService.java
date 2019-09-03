@@ -1,14 +1,19 @@
 package com.lessons.filter;
 
+import com.lessons.models.ShortReportDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
+import sun.java2d.pipe.SpanShapeRenderer;
 
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /*
@@ -54,7 +59,8 @@ public class FilterService {
         // Do the field names correspond to database columns?
 
         if (aFilters == null) {
-            throw new RuntimeException("aFliters is empty");
+           // throw new RuntimeException("aFliters is empty");
+            return true;
         }
 
         for (String filter: aFilters){
@@ -114,7 +120,69 @@ public class FilterService {
     public FilterParams getFilterParamsForFilters(List<String> aFilters) {
         logger.debug("getFilterClause() started.");
 
-      return null;
+        // FilterParams data members
+        String whereclause = "";
+        Map<String, Object> mapOfBindVariables = new HashMap<>();
+
+        // Bind variable name builders
+        String bindVarBase = "bind";
+        int bindVarInterator = 0;
+
+        // Process each filter
+        for (String filter : aFilters){
+
+            // Break up the filter string into parts
+            String[] parts = StringUtils.split(filter, FILTER_SEPARATOR);
+            String columnName = parts[0];
+            String operationName = parts[1];
+
+            // Get the business rules
+            FilterOperation br = FilterOperation.getOperation(operationName);
+
+            // Parse out bind variables and add to map
+            String bindVarNameA = bindVarBase + bindVarInterator;
+            bindVarInterator += 1;
+
+
+            // Create WHERE clause based on number of tokens expected
+
+            if (br.getTokenCount() == 2){
+                whereclause = whereclause + String.format(br.getSqlOperator(), columnName);
+            } // End of 2-count token
+
+            else if (br.getTokenCount() == 3){
+
+                String tokenList = "";
+                for (int i = 2; i < parts.length; i++) {
+                    tokenList = tokenList + parts[i] + " , ";
+                }
+                tokenList = StringUtils.substring(tokenList, 0, tokenList.length() - 3);
+                mapOfBindVariables.put(bindVarNameA, tokenList);
+
+                whereclause = whereclause + String.format(br.getSqlOperator(), columnName, bindVarNameA);
+            } // End of 3-count token
+
+            else if (br.getTokenCount() == 4){
+                String bindVarNameB = bindVarBase + bindVarInterator;
+                bindVarInterator++;
+
+                mapOfBindVariables.put(bindVarNameA, parts[2]);
+                mapOfBindVariables.put(bindVarNameB, parts[3]);
+
+                whereclause = whereclause + String.format(br.getSqlOperator(), columnName, bindVarNameA, bindVarNameB);
+            } // End of 4-count token
+
+            whereclause = whereclause + " AND ";
+
+        } // End of filter list loop
+        whereclause = StringUtils.substring(whereclause, 0, whereclause.length() - 5);
+        logger.debug("whereclause = {}", whereclause);
+
+        FilterParams fp = new FilterParams();
+        fp.setSqlWhereClause(whereclause);
+        fp.setSqlParams(mapOfBindVariables);
+
+      return fp;
     }
 
     /**
@@ -129,4 +197,5 @@ public class FilterService {
         logger.debug("getSqlOrderByClauseForSortFields() started.");
         return null;
     }
+
 }
