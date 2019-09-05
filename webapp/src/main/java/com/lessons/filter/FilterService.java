@@ -132,14 +132,14 @@ public class FilterService {
         for (String filter : aFilters){
 
             // Break up the filter string into parts
-            String[] parts = StringUtils.split(filter, FILTER_SEPARATOR);
-            String columnName = parts[0];
-            String operationName = parts[1];
+            List<String> tokens = Arrays.asList(StringUtils.split(filter, FILTER_SEPARATOR));
+            String columnName = tokens.get(0);
+            String operationName = tokens.get(1);
 
             // Get the business rules
             FilterOperation br = FilterOperation.getOperation(operationName);
 
-            // Parse out bind variables and add to map
+            // Create named bind variable
             String bindVarNameA = bindVarBase + bindVarInterator;
             bindVarInterator += 1;
 
@@ -151,23 +151,25 @@ public class FilterService {
             } // End of 2-count token
 
             else if (br.getTokenCount() == 3){
-
-                String tokenList = "";
-                for (int i = 2; i < parts.length; i++) {
-                    tokenList = tokenList + parts[i] + " , ";
+                // Assign single value to bind variable map
+                if (tokens.size() == 3){
+                    mapOfBindVariables.put(bindVarNameA, tokens.get(2));
                 }
-                tokenList = StringUtils.substring(tokenList, 0, tokenList.length() - 3);
-                mapOfBindVariables.put(bindVarNameA, tokenList);
+                // Assign list to bind variable maps
+                else{
+                    mapOfBindVariables.put(bindVarNameA, tokens.subList(2, tokens.size()-1));
+                }
 
                 whereclause = whereclause + String.format(br.getSqlOperator(), columnName, bindVarNameA);
             } // End of 3-count token
 
             else if (br.getTokenCount() == 4){
+                // Create additional special case bind variable
                 String bindVarNameB = bindVarBase + bindVarInterator;
-                bindVarInterator++;
+                bindVarInterator += 1;
 
-                mapOfBindVariables.put(bindVarNameA, parts[2]);
-                mapOfBindVariables.put(bindVarNameB, parts[3]);
+                mapOfBindVariables.put(bindVarNameA, tokens.get(2));
+                mapOfBindVariables.put(bindVarNameB, tokens.get(3));
 
                 whereclause = whereclause + String.format(br.getSqlOperator(), columnName, bindVarNameA, bindVarNameB);
             } // End of 4-count token
