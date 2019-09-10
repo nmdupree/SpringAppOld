@@ -143,7 +143,7 @@ public class FilterService {
             String bindVarNameA = bindVarBase + bindVarInterator;
             bindVarInterator += 1;
 
-
+            /* GENERIC
             // Create WHERE clause based on number of tokens expected
 
             if (br.getTokenCount() == 2){
@@ -157,7 +157,7 @@ public class FilterService {
                 }
                 // Assign list to bind variable maps
                 else{
-                    mapOfBindVariables.put(bindVarNameA, tokens.subList(2, tokens.size()-1));
+                    mapOfBindVariables.put(bindVarNameA, tokens.subList(2, tokens.size()));
                 }
 
                 whereclause = whereclause + String.format(br.getSqlOperator(), columnName, bindVarNameA);
@@ -173,6 +173,39 @@ public class FilterService {
 
                 whereclause = whereclause + String.format(br.getSqlOperator(), columnName, bindVarNameA, bindVarNameB);
             } // End of 4-count token
+             */
+
+            if (br.getFilterOperation().equalsIgnoreCase("EQUALS")){
+
+            }
+
+            else if (br.getFilterOperation().equalsIgnoreCase("STRING_EQUALS")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("GREATER")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("GREATER_EQUAL")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("LESS")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("LESS_EQUAL")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("BETWEEN")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("IN")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("NOTIN")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("CONTAINS")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("STRING_CONTAINS")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("ICONTAINS")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("STRING_ICONTAINS")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("ISNULL")){}
+
+            else if (br.getFilterOperation().equalsIgnoreCase("ISNOTNULL")){}
 
             whereclause = whereclause + " AND ";
 
