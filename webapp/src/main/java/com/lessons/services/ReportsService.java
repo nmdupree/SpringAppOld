@@ -2,6 +2,7 @@ package com.lessons.services;
 
 import com.lessons.filter.FilterParams;
 import com.lessons.filter.FilterService;
+import com.lessons.models.ReportStatsDTO;
 import com.lessons.models.ShortReportDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,5 +123,23 @@ public class ReportsService {
         }
 
         return dtoList;
+    }
+
+    public List<ReportStatsDTO> getReportStats() {
+        logger.debug("getReportStats() called");
+
+        BeanPropertyRowMapper rowMapper = new BeanPropertyRowMapper(ReportStatsDTO.class);
+        // Don't change this SQL - rowMapper will not fail, it will return nulls/bad data
+        String sql = "SELECT lri.report, r.display_name, count(lri.indicator) AS indicator_count " +
+                        "FROM link_reports_indicators lri " +
+                        "JOIN reports r on lri.report = r.id " +
+                        "GROUP BY lri.report, r.display_name " +
+                        "ORDER BY indicator_count DESC " +
+                        "LIMIT 5";
+        JdbcTemplate jt = new JdbcTemplate(this.dataSource);
+        List<ReportStatsDTO> dtoList = jt.query(sql, rowMapper);
+
+        return dtoList;
+
     }
 }
