@@ -26,3 +26,9 @@ jasypt:
     encryptor:
         algorithm: PBEWithMD5AndDES
         password: 'ab5823423464j1k2#!!6298-+'
+
+###########################################################
+# ElasticSearch Settings
+##########################################################
+
+es.url: http://localhost:9200
